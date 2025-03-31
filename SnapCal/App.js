@@ -1,20 +1,16 @@
-import * as React from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from './screens/HomeScreen';
-// import AddMealScreen from './screens/AddMealScreen';
-
-const Stack = createStackNavigator();
+import { StatusBar } from 'expo-status-bar';
+import { NutritionProvider } from './contexts/NutritionContext';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        // screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        {/* <Stack.Screen name="AddMeal" component={AddMealScreen} /> */}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <NutritionProvider>
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <AppNavigator />
+      </NavigationContainer>
+    </NutritionProvider>
   );
 }

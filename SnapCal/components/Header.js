@@ -1,12 +1,18 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Header() {
+  
+  const navigation = useNavigation();
+
   return (
     <View style={styles.header}>
       <Text style={styles.headerText}>SnapCal</Text>
-      <FontAwesome name="user-circle" size={24} color="#2F855A" />
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        <FontAwesome name="user-circle" size={24} color="#2F855A" />
+      </TouchableOpacity>
     </View>
   );
 }

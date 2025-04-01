@@ -64,11 +64,6 @@ export default function AddMealScreen({ route, navigation }) {
             <FontAwesome name="image" size={24} color="#2F855A" />
             <Text style={styles.optionText}>Upload from Gallery</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.optionCard}>
-            <FontAwesome name="search" size={24} color="#2F855A" />
-            <Text style={styles.optionText}>Search Food</Text>
-          </TouchableOpacity>
         </View>
         
         <Text style={styles.sectionTitle}>Manual Entry</Text>
@@ -164,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 16,
-    width: '30%',
+    width: '45%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

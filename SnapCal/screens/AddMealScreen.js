@@ -101,7 +101,7 @@ export default function AddMealScreen({ route, navigation }) {
 
       if (!result.canceled) {
         console.log('Camera Image URI:', result.assets[0].uri);
-        navigation.navigate('CaptureScreen', { imageUri: result.assets[0].uri });
+        navigation.navigate('PreviewScreen', { imageUri: result.assets[0].uri });
       }
     } catch (error) {
       console.log('Error launching camera:', error);
@@ -130,7 +130,7 @@ export default function AddMealScreen({ route, navigation }) {
 
       if (!result.canceled) {
         console.log('Gallery Image URI:', result.assets[0].uri);
-        navigation.navigate('CaptureScreen', { imageUri: result.assets[0].uri });
+        navigation.navigate('PreviewScreen', { imageUri: result.assets[0].uri });
       }
     } catch (error) {
       console.log('Error opening gallery:', error);

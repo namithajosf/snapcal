@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 
-export default function CaptureScreen({ route, navigation }) {
+export default function PreviewScreen({ route, navigation }) {
   const { imageUri } = route.params || {};
   const [modalVisible, setModalVisible] = useState(true);
 

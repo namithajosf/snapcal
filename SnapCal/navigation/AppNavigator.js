@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import AddMealScreen from '../screens/AddMealScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import CaptureScreen from '../screens/CaptureScreen';
+import PreviewScreen from '../screens/PreviewScreen';
 
 const Stack = createStackNavigator();
 
@@ -13,8 +13,8 @@ const AppNavigator = () => (
     <Stack.Screen name="AddMeal" component={AddMealScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen 
-      name="CaptureScreen" 
-      component={CaptureScreen}
+      name="PreviewScreen" 
+      component={PreviewScreen}
       options={{
         presentation: 'transparentModal',
         cardOverlayEnabled: true,

@@ -39,3 +39,4 @@ yarn-error.*
 *.tsbuildinfo
 
 __pycache__
+runs/

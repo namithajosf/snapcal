@@ -21,6 +21,7 @@ const AppNavigator = () => (
         cardStyle: { backgroundColor: 'transparent' }
       }}
     />
+    <Stack.Screen name="LogMeal" component={LogMealScreen} />
   </Stack.Navigator>
 );
 

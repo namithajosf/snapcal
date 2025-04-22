@@ -17,6 +17,7 @@ import { Camera } from 'expo-camera';
 import { useNutrition } from '../contexts/NutritionContext';
 import Header from '../components/Header';
 import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';  // Import axios for API requests
 
 export default function AddMealScreen({ route, navigation }) {
   const { mealType } = route.params || {};
@@ -53,7 +54,7 @@ export default function AddMealScreen({ route, navigation }) {
     })();
   }, []);
 
-  const handleAddMeal = () => {
+  const handleAddMeal = async () => {
     if (!foodName || !calories || !protein || !carbs || !fat) {
       Alert.alert(
         'Missing Information',
@@ -61,23 +62,41 @@ export default function AddMealScreen({ route, navigation }) {
       );
       return;
     }
-  
+
     const calNum = parseInt(calories) || 0;
     const proteinNum = parseInt(protein) || 0;
     const carbsNum = parseInt(carbs) || 0;
     const fatNum = parseInt(fat) || 0;
-  
+
+    // Update local state with new consumed values
     setConsumedCalories(consumedCalories + calNum);
-  
+
     setMacros({
       protein: { consumed: macros.protein.consumed + proteinNum, goal: macros.protein.goal },
       carbs: { consumed: macros.carbs.consumed + carbsNum, goal: macros.carbs.goal },
       fat: { consumed: macros.fat.consumed + fatNum, goal: macros.fat.goal },
     });
-  
-    navigation.goBack();
+
+    try {
+      const payload = {
+        user_id: 1,  // Replace with actual user ID, perhaps coming from context or state
+        title: foodName,
+        calories: calNum,
+        protein: proteinNum,
+        carbs: carbsNum,
+        fat: fatNum,
+      };
+
+      // Make API call to log the meal in the database
+      await axios.post('http://192.168.141.84:8000/log-meal', payload);
+
+      Alert.alert("Success", "Meal logged successfully!");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error logging meal:", error);
+      Alert.alert("Error", "Something went wrong while logging the meal.");
+    }
   };
-  
 
   const openCamera = async () => {
     if (!cameraPermission) {
@@ -94,7 +113,7 @@ export default function AddMealScreen({ route, navigation }) {
 
     try {
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'Images',
         quality: 1,
         allowsEditing: true,
       });
@@ -123,7 +142,7 @@ export default function AddMealScreen({ route, navigation }) {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'Images',
         quality: 1,
         allowsEditing: true,
       });

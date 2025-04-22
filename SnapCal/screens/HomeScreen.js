@@ -16,7 +16,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useNutrition } from '../contexts/NutritionContext';
 
 export default function HomeScreen({ navigation }) {
-  const { meals } = useNutrition();
+  const { nutrition } = useNutrition();
+  const meals = nutrition?.meals || [];
 
   return (
     <>

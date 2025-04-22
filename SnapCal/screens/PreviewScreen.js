@@ -9,6 +9,8 @@ import {
   SafeAreaView
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
 
 export default function PreviewScreen({ route, navigation }) {
   const { imageUri } = route.params || {};
@@ -19,21 +21,50 @@ export default function PreviewScreen({ route, navigation }) {
     navigation.goBack();
   };
 
-  const analyzeImage = () => {
-    // This function would connect to your nutrition analysis service
+const analyzeImage = async () => {
+  try {
     console.log("Sending image for analysis...");
-    // After analysis, you'd typically navigate back with the data
-    // For now, just navigate back
-    navigation.navigate('AddMealScreen', {
+
+    const fileUri = imageUri;
+    const fileType = fileUri.split('.').pop();
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      name: `photo.${fileType}`,
+      type: `image/${fileType}`,
+    });
+
+    const response = await axios.post(
+      'http://192.168.141.84:8000/predict-meal',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    const { foodName, calories, protein, carbs, fat } = response.data;
+
+    navigation.replace('LogMeal', {
+      imageUri,
       analyzedData: {
-        foodName: 'Fried Chicken with Mashed Potatoes',
-        calories: '450',
-        protein: '30',
-        carbs: '35',
-        fat: '22'
+        foodName,
+        calories,
+        protein,
+        carbs,
+        fat,
       }
     });
-  };
+    console.log("Image analysis response:", response.data);
+  } catch (error) {
+    console.error('Image analysis failed:', error);
+    alert('Failed to analyze the image. Please try again.');
+  }
+};
+
+  
 
   return (
     <SafeAreaView style={styles.container}>

@@ -44,3 +44,16 @@ def login(credentials: schemas.Login, db: Session = Depends(get_db)):
     
     logger.info(f"User {credentials.email} logged in successfully")
     return {"message": "Login successful", "user": user}
+
+# Route to update user profile (exclude password for now, unless specified)
+@router.put("/update-profile/{user_id}")
+def update_profile(user_id: int, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
+    logger.info(f"Attempting to update profile for user ID: {user_id}")
+    updated_user = crud.update_user(db, user_id, user_update)
+    
+    if not updated_user:
+        logger.error(f"User ID {user_id} not found")
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    logger.info(f"User ID {user_id} profile updated successfully")
+    return {"message": "Profile updated successfully", "user": updated_user}

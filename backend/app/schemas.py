@@ -16,4 +16,11 @@ class UserCreate(BaseModel):
 class Login(BaseModel):
     email: EmailStr
     password: str
-    
+
+# Schema for updating user profile
+class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    dob: Optional[date] = None

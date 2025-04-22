@@ -57,3 +57,33 @@ def update_profile(user_id: int, user_update: schemas.UserUpdate, db: Session = 
     
     logger.info(f"User ID {user_id} profile updated successfully")
     return {"message": "Profile updated successfully", "user": updated_user}
+
+
+# Route for logging meals
+@router.post("/log-meal")
+async def log_meal(payload: schemas.LogMealRequest, db: Session = Depends(get_db)):
+    logger.info(f"Attempting to log meal for user ID: {payload.user_id}")
+    
+    # Ensure that the user exists
+    user = db.query(model.User).filter(model.User.id == payload.user_id).first()
+    if not user:
+        logger.error(f"User ID {payload.user_id} not found")
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Create a new DailyNutrition entry
+    new_meal = model.DailyNutrition(
+        user_id=payload.user_id,
+        record_date=func.current_date(),
+        consumed_calories=payload.calories,
+        fat_consumed=payload.fat,
+        protein_consumed=payload.protein,
+        carbs_consumed=payload.carbs,
+        meal_name=payload.title  # Use the title as meal name
+    )
+
+    db.add(new_meal)
+    db.commit()
+    db.refresh(new_meal)
+
+    logger.info(f"Meal logged successfully for user ID: {payload.user_id}, meal: {new_meal.meal_name}")
+    return {"message": "Meal logged successfully", "meal": new_meal}

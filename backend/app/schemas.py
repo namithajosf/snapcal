@@ -24,3 +24,11 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     username: Optional[str] = None
     dob: Optional[date] = None
+
+class LogMealRequest(BaseModel):
+    user_id: int
+    title: str
+    calories: int
+    fat: int
+    protein: int
+    carbs: int  

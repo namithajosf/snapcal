@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import WaterTracker from './WaterTracker';
-import OtherDrinks from './OtherDrinks';
 
 export default function DrinksSection() {
   return (
@@ -9,7 +8,6 @@ export default function DrinksSection() {
       <Text style={styles.sectionTitle}>Drinks</Text>
       <View style={styles.drinksContainer}>
         <WaterTracker />
-        <OtherDrinks />
       </View>
     </View>
   );

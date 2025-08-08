@@ -13,56 +13,53 @@ import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
 export default function PreviewScreen({ route, navigation }) {
-  const { imageUri } = route.params || {};
-  const [modalVisible, setModalVisible] = useState(true);
+const { imageUri, mealType } = route.params || {};
+const [modalVisible, setModalVisible] = useState(true);
 
   const closeModal = () => {
     setModalVisible(false);
     navigation.goBack();
   };
 
-const analyzeImage = async () => {
-  try {
-    console.log("Sending image for analysis...");
-
-    const fileUri = imageUri;
-    const fileType = fileUri.split('.').pop();
-
-    const formData = new FormData();
-    formData.append('file', {
-      uri: fileUri,
-      name: `photo.${fileType}`,
-      type: `image/${fileType}`,
-    });
-
-    const response = await axios.post(
-      'http://192.168.141.84:8000/predict-meal',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-
-    const { foodName, calories, protein, carbs, fat } = response.data;
-
-    navigation.replace('LogMeal', {
-      imageUri,
-      analyzedData: {
-        foodName,
-        calories,
-        protein,
-        carbs,
-        fat,
-      }
-    });
-    console.log("Image analysis response:", response.data);
-  } catch (error) {
-    console.error('Image analysis failed:', error);
-    alert('Failed to analyze the image. Please try again.');
-  }
-};
+  const analyzeImage = async () => {
+    try {
+      console.log("Sending image for analysis...");
+  
+      const fileUri = imageUri;
+      const fileType = fileUri.split('.').pop();
+  
+      const formData = new FormData();
+      formData.append('file', {
+        uri: fileUri,
+        name: `photo.${fileType}`,
+        type: `image/${fileType}`,
+      });
+  
+      const response = await axios.post(
+        'http://192.168.141.84:8000/predict-meal',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
+      // Log the full response for debugging
+      console.log("Image analysis response:", response.data);
+  
+      // Send the entire response data to the LogMeal screen
+      navigation.replace('LogMeal', {
+        imageUri,
+        analyzedData: response.data, // Send the full response data
+        mealType,
+      });
+  
+    } catch (error) {
+      console.error('Image analysis failed:', error);
+      alert('Failed to analyze the image. Please try again.');
+    }
+  };  
 
   
 

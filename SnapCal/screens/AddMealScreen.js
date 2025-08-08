@@ -120,7 +120,10 @@ export default function AddMealScreen({ route, navigation }) {
 
       if (!result.canceled) {
         console.log('Camera Image URI:', result.assets[0].uri);
-        navigation.navigate('PreviewScreen', { imageUri: result.assets[0].uri });
+        navigation.navigate('PreviewScreen', {
+          imageUri: result.assets[0].uri,
+          mealType: mealType,  // Pass the mealType
+        });
       }
     } catch (error) {
       console.log('Error launching camera:', error);
@@ -149,7 +152,10 @@ export default function AddMealScreen({ route, navigation }) {
 
       if (!result.canceled) {
         console.log('Gallery Image URI:', result.assets[0].uri);
-        navigation.navigate('PreviewScreen', { imageUri: result.assets[0].uri });
+        navigation.navigate('PreviewScreen', {
+          imageUri: result.assets[0].uri,
+          mealType: mealType,  // Pass the mealType
+        });  
       }
     } catch (error) {
       console.log('Error opening gallery:', error);

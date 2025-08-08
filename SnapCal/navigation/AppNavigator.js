@@ -6,6 +6,7 @@ import AddMealScreen from '../screens/AddMealScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import PreviewScreen from '../screens/PreviewScreen';
 import LogMealScreen from '../screens/LogMealScreen';
+import ViewMealScreen from '../screens/ViewMealScreen';
 import LoginScreen from '../screens/LoginScreen';
 import { AuthContext } from '../contexts/authContext';
 
@@ -27,6 +28,7 @@ const AppNavigator = () => {
             cardStyle: { backgroundColor: 'transparent' }
           }} />
           <Stack.Screen name="LogMeal" component={LogMealScreen} />
+          <Stack.Screen name="ViewMeal" component={ViewMealScreen} />
         </>
       ) : (
         <>

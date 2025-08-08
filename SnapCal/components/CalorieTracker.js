@@ -1,65 +1,91 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import Svg, { Circle } from 'react-native-svg';
-import { useNutrition } from '../contexts/NutritionContext';
-import NutrientBar from './NutrientBar';
+import NutrientBar from './NutrientBar'; // Assuming NutrientBar is another component
 
-export default function CalorieTracker() {
-  const { consumedCalories, dailyGoal, macros } = useNutrition();
-  
-  // Circle progress calculation
+export default function CalorieTracker({ userId }) {
+  const [nutritionData, setNutritionData] = useState(null);  
+  const [mealsData, setMealsData] = useState([]);  
+  const [loading, setLoading] = useState(true);  
+
+  useEffect(() => {
+    if (userId) {
+      const fetchData = async () => {
+        try {
+          const [nutritionRes, mealsRes] = await Promise.all([
+            axios.get(`http://192.168.141.84:8000/nutrition-goals/${userId}`),
+            axios.get(`http://192.168.141.84:8000/meals/${userId}`)
+          ]);
+          setNutritionData(nutritionRes.data);
+          setMealsData(mealsRes.data);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  if (!nutritionData) {
+    return <Text>No nutrition data available</Text>;
+  }
+
+  const totalCaloriesConsumed = mealsData.reduce(
+    (total, meal) => total + (meal.consumed_calories || 0),
+    0
+  );
+
+  const daily_calories = nutritionData.daily_calories || 1; // prevent divide by 0
+
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const strokeWidth = 10;
-  const strokeDashoffset = circumference - (consumedCalories / dailyGoal) * circumference;
+  const strokeDashoffsetCalories = circumference - (totalCaloriesConsumed / daily_calories) * circumference;
 
   return (
-    <View style={styles.calorieTracker}>
-      {/* Circular Progress Bar (Left) */}
-      <View style={styles.calorieCircle}>
-        <Svg width="150" height="150" viewBox="0 0 150 150">
-          <Circle
-            cx="75"
-            cy="75"
-            r={radius}
-            stroke="#E2E8F0"
-            strokeWidth={strokeWidth}
-            fill="none"
-          />
-          <Circle
-            cx="75"
-            cy="75"
-            r={radius}
-            stroke="#2F855A"
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-          />
-        </Svg>
-        <Text style={styles.calorieText}>{consumedCalories} / {dailyGoal} kcal</Text>
-      </View>
+    <View style={styles.container}>
+      <View style={styles.calorieTracker}>
+        <View style={styles.calorieCircle}>
+          <Svg width="150" height="150" viewBox="0 0 150 150">
+            <Circle
+              cx="75"
+              cy="75"
+              r={radius}
+              stroke="#E2E8F0"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            <Circle
+              cx="75"
+              cy="75"
+              r={radius}
+              stroke="#2F855A"
+              strokeWidth={strokeWidth}
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffsetCalories}
+              strokeLinecap="round"
+            />
+          </Svg>
 
-      {/* Nutrient Info (Right) */}
+          <View style={styles.calorieTextWrapper}>
+            <Text style={styles.calorieText}>{totalCaloriesConsumed}</Text>
+            <Text style={styles.totalCalorieText}>/ {daily_calories} kcal</Text>
+          </View>
+        </View>
+      </View>
+      
+      {/* NutrientBar Component */}
       <View style={styles.nutrientInfo}>
         <NutrientBar 
-          label="Fat" 
-          consumed={macros.fat.consumed} 
-          goal={macros.fat.goal} 
-          color="#F6E05E" 
-        />
-        <NutrientBar 
-          label="Protein" 
-          consumed={macros.protein.consumed} 
-          goal={macros.protein.goal} 
-          color="#68D391" 
-        />
-        <NutrientBar 
-          label="Carbs" 
-          consumed={macros.carbs.consumed} 
-          goal={macros.carbs.goal} 
-          color="#F6AD55" 
+          userId={userId} // Pass the userId prop to NutrientBar
         />
       </View>
     </View>
@@ -67,28 +93,41 @@ export default function CalorieTracker() {
 }
 
 const styles = StyleSheet.create({
-  calorieTracker: {
-    flexDirection: 'row',
+  container: {
+    flexDirection: 'row', // To align both components side by side
+    justifyContent: 'space-between', // To space out the components
+    padding: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    padding: 16,
-    marginBottom: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
   },
+  calorieTracker: {
+    flex: 1, // To allow it to take up space on the left
+    alignItems: 'center',
+  },
   calorieCircle: {
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
   },
-  calorieText: {
+  calorieTextWrapper: {
     position: 'absolute',
-    fontSize: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calorieText: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#2F855A',
+  },
+  totalCalorieText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#A0AEC0',
   },
   nutrientInfo: {
     flex: 1,

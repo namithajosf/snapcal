@@ -1,26 +1,35 @@
+// MealsList.js
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MealItem from './MealItem';
 
-export default function MealsList({ navigation }) {
-  // Meals dictionary
-  const meals = [
-    { type: 'Breakfast', recommended: 336, icon: require('../assets/breakfast.png') },
-    { type: 'Lunch', recommended: 403, icon: require('../assets/lunch.png') },
-    { type: 'Dinner', recommended: 403, icon: require('../assets/dinner.png') },
-    { type: 'Snacks', recommended: 201, icon: require('../assets/snack.png') },
+export default function MealsList({ navigation, meals, loading }) {
+  const mealTypes = [
+    { type: 'Breakfast', icon: require('../assets/breakfast.png') },
+    { type: 'Lunch', icon: require('../assets/lunch.png') },
+    { type: 'Dinner', icon: require('../assets/dinner.png') },
+    { type: 'Other', icon: require('../assets/other.png') },
   ];
 
   return (
     <View style={styles.mealsSection}>
       <Text style={styles.sectionTitle}>Log your meals</Text>
-      {meals.map((meal, index) => (
-        <MealItem 
-          key={index} 
-          meal={meal} 
-          onPress={() => navigation.navigate('AddMeal', { mealType: meal.type })} 
-        />
-      ))}
+      {mealTypes.map((mealType, index) => {
+        const filteredMeals = meals.filter(
+          (meal) => meal.meal_type === mealType.type
+        );
+
+        return (
+          <MealItem
+            key={index}
+            meal={mealType}
+            onPress={() => navigation.navigate('AddMeal', { mealType: mealType.type })}
+            loggedMeals={filteredMeals}
+            loading={loading}
+            navigation={navigation}
+          />
+        );
+      })}
     </View>
   );
 }

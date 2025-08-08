@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, TIMESTAMP, JSON
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, TIMESTAMP, JSON, Float
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy.sql import func
@@ -31,17 +31,15 @@ class User(Base):
 class DailyNutrition(Base):
     __tablename__ = "daily_nutrition"
 
-    record_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    record_date = Column(Date, server_default=func.current_date(), nullable=False)
-
-    consumed_calories = Column(Integer, default=0, nullable=False)
-
-    fat_consumed = Column(Integer, default=0, nullable=False)
-    protein_consumed = Column(Integer, default=0, nullable=False)
-    carbs_consumed = Column(Integer, default=0, nullable=False)
-
-    meal_name = Column(String, nullable=True)  # Optional, can be null if not provided
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    record_date = Column(Date, default=func.current_date())
+    meal_name = Column(String)
+    consumed_calories = Column(Integer)
+    fat_consumed = Column(Float)
+    protein_consumed = Column(Float)
+    carbs_consumed = Column(Float)
+    meal_type = Column(String, default="Other")
 
     user = relationship("User", back_populates="daily_nutrition")
 

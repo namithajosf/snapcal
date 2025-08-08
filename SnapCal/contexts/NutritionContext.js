@@ -9,7 +9,6 @@ export const useNutrition = () => useContext(NutritionContext);
 // Nutrition Provider Component
 export const NutritionProvider = ({ children }) => {
   const [consumedCalories, setConsumedCalories] = useState(() => {
-    // Check if localStorage is available
     if (typeof window !== 'undefined' && window.localStorage) {
       const savedCalories = localStorage.getItem('consumedCalories');
       return savedCalories ? JSON.parse(savedCalories) : 0;
@@ -75,6 +74,10 @@ export const NutritionProvider = ({ children }) => {
     };
   });
 
+  const [calorieStatus, setCalorieStatus] = useState(() => {
+    return consumedCalories >= dailyGoal ? 'exceeded' : 'normal';
+  });
+
   // Update localStorage whenever any state changes
   useEffect(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -84,8 +87,18 @@ export const NutritionProvider = ({ children }) => {
       localStorage.setItem('waterCount', JSON.stringify(waterCount));
       localStorage.setItem('waterAmount', JSON.stringify(waterAmount));
       localStorage.setItem('drinks', JSON.stringify(drinks));
+      localStorage.setItem('calorieStatus', JSON.stringify(calorieStatus));
     }
-  }, [consumedCalories, dailyGoal, macros, waterCount, waterAmount, drinks]);
+  }, [consumedCalories, dailyGoal, macros, waterCount, waterAmount, drinks, calorieStatus]);
+
+  // Function to update calorieStatus based on consumedCalories
+  useEffect(() => {
+    if (consumedCalories >= dailyGoal) {
+      setCalorieStatus('exceeded');
+    } else {
+      setCalorieStatus('normal');
+    }
+  }, [consumedCalories, dailyGoal]);
 
   // Functions to update state
   const incrementDrinkCount = (drinkKey) => {
@@ -147,6 +160,7 @@ export const NutritionProvider = ({ children }) => {
     waterCount,
     waterAmount,
     drinks,
+    calorieStatus, // Add calorieStatus to context
     incrementDrinkCount,
     decrementDrinkCount,
     incrementWaterCount,

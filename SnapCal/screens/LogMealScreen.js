@@ -1,20 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Alert,
+  Linking
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LogMealScreen({ route, navigation }) {
-  const { imageUri, analyzedData } = route.params || {};
+  const { imageUri, analyzedData, mealType } = route.params || {};
+  const nutrition = analyzedData?.nutrition || {};
 
-  const [title, setTitle] = useState(analyzedData?.foodName || "Unknown Food");
+  // Extract values from food_description using RegEx
+  const foodDescription = nutrition?.raw?.food_description || '';
+  const getMatch = (pattern) => foodDescription.match(pattern)?.[1] || "0";
+
+  const [title, setTitle] = useState(nutrition?.food_name || "Unknown Food");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  const [calories, setCalories] = useState(analyzedData?.calories?.toString() || "0");
-  const [fat, setFat] = useState(analyzedData?.fat?.toString() || "0");
-  const [protein, setProtein] = useState(analyzedData?.protein?.toString() || "0");
-  const [carbs, setCarbs] = useState(analyzedData?.carbs?.toString() || "0");
+  const [calories, setCalories] = useState(getMatch(/Calories:\s*(\d+)/));
+  const [fat, setFat] = useState(getMatch(/Fat:\s*([\d.]+)/));
+  const [protein, setProtein] = useState(getMatch(/Protein:\s*([\d.]+)/));
+  const [carbs, setCarbs] = useState(getMatch(/Carbs:\s*([\d.]+)/));
 
   const toggleEditTitle = () => {
     setIsEditingTitle(!isEditingTitle);
@@ -22,7 +39,10 @@ export default function LogMealScreen({ route, navigation }) {
 
   const handleSaveMeal = async () => {
     try {
+      console.log("Saving meal...");
       const userDataString = await AsyncStorage.getItem('userData');
+      console.log("Retrieved user data:", userDataString);
+  
       if (!userDataString) {
         Alert.alert("Error", "User not found. Please log in again.");
         return;
@@ -32,8 +52,6 @@ export default function LogMealScreen({ route, navigation }) {
       const userId = userData?.id;
   
       if (!userId) {
-        console.log("Parsed userData:", userData);
-        console.log("Extracted userId:", userId);
         Alert.alert("Error", "User ID missing. Please log in again.");
         return;
       }
@@ -42,19 +60,25 @@ export default function LogMealScreen({ route, navigation }) {
         user_id: parseInt(userId),
         title: title,
         calories: parseInt(calories),
-        fat: parseInt(fat),
-        protein: parseInt(protein),
-        carbs: parseInt(carbs),
+        fat: parseFloat(fat),
+        protein: parseFloat(protein),
+        carbs: parseFloat(carbs),
+        meal_type: mealType, // Add mealType to the payload
       };
   
+      console.log("Payload being sent:", payload);
       await axios.post('http://192.168.141.84:8000/log-meal', payload);
+  
       Alert.alert("Success", "Meal logged successfully!");
-      navigation.goBack();
+  
+      // Navigate back to the home screen (or whatever screen you want)
+      navigation.navigate('Home');
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to log meal.");
     }
   };
+  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -91,6 +115,16 @@ export default function LogMealScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {nutrition?.serving_size && (
+          <Text style={styles.servingText}>Serving Size: {nutrition.serving_size}</Text>
+        )}
+
+        {nutrition?.food_url && (
+          <TouchableOpacity onPress={() => Linking.openURL(nutrition.food_url)}>
+            <Text style={styles.link}>View full nutrition info</Text>
+          </TouchableOpacity>
+        )}
 
         <Text style={styles.subHeading}>Meal Details</Text>
 
@@ -191,6 +225,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F4EA',
     borderRadius: 20,
     padding: 6,
+  },
+  servingText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 6,
+  },
+  link: {
+    color: '#2B6CB0',
+    marginBottom: 10,
+    fontSize: 14,
   },
   subHeading: {
     fontWeight: 'bold',
